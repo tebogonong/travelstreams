@@ -17,6 +17,8 @@ export interface TokenMetrics {
   marketCap: number;
 }
 
+export type VideoCategory = 'safety' | 'fun' | 'shopping' | 'food' | 'culture' | 'nightlife' | 'adventure' | 'nature';
+
 export interface VideoContent {
   id: string;
   location: Location;
@@ -34,4 +36,6 @@ export interface VideoContent {
   bettingPool: number;
   createdAt: Date;
   paidToPost: number;
+  categories: VideoCategory[];
+  embedUrl?: string;
 }

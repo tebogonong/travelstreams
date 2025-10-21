@@ -1,4 +1,4 @@
-import { VideoContent } from "@/types/video";
+import { VideoContent, VideoCategory } from "@/types/video";
 
 export const mockVideos: VideoContent[] = [
   {
@@ -29,7 +29,8 @@ export const mockVideos: VideoContent[] = [
     },
     bettingPool: 12500,
     createdAt: new Date(),
-    paidToPost: 0.10
+    paidToPost: 0.10,
+    categories: ['culture', 'nature', 'fun']
   },
   {
     id: "2",
@@ -59,7 +60,8 @@ export const mockVideos: VideoContent[] = [
     },
     bettingPool: 45000,
     createdAt: new Date(),
-    paidToPost: 0.10
+    paidToPost: 0.10,
+    categories: ['food', 'culture', 'shopping']
   },
   {
     id: "3",
@@ -89,7 +91,8 @@ export const mockVideos: VideoContent[] = [
     },
     bettingPool: 8900,
     createdAt: new Date(),
-    paidToPost: 0.10
+    paidToPost: 0.10,
+    categories: ['shopping', 'fun', 'culture']
   },
   {
     id: "4",
@@ -119,7 +122,8 @@ export const mockVideos: VideoContent[] = [
     },
     bettingPool: 21000,
     createdAt: new Date(),
-    paidToPost: 0.10
+    paidToPost: 0.10,
+    categories: ['adventure', 'nature', 'safety']
   },
   {
     id: "5",
@@ -149,6 +153,7 @@ export const mockVideos: VideoContent[] = [
     },
     bettingPool: 6700,
     createdAt: new Date(),
-    paidToPost: 0.10
+    paidToPost: 0.10,
+    categories: ['nightlife', 'fun', 'food']
   }
 ];

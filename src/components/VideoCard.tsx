@@ -1,5 +1,6 @@
 import { VideoContent } from "@/types/video";
 import { TrendingUp, TrendingDown, Users, DollarSign, Flame } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface VideoCardProps {
   video: VideoContent;
@@ -41,6 +42,17 @@ export const VideoCard = ({ video }: VideoCardProps) => {
               <p className="text-sm text-muted-foreground">
                 {video.location.name}, {video.location.country}
               </p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {video.categories.map((category) => (
+                  <Badge
+                    key={category}
+                    variant="secondary"
+                    className="text-xs capitalize bg-background/50 backdrop-blur-sm"
+                  >
+                    {category}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
 
