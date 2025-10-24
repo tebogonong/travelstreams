@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
 import { VideoCategory } from "@/types/video";
 import { useToast } from "@/hooks/use-toast";
+import { BasePay } from "./BasePay";
+import { useAccount } from "wagmi";
 
 const CATEGORIES: VideoCategory[] = ['safety', 'fun', 'shopping', 'food', 'culture', 'nightlife', 'adventure', 'nature'];
 
@@ -14,6 +16,7 @@ export const ContentSubmissionModal = () => {
   const [open, setOpen] = useState(false);
   const [embedUrl, setEmbedUrl] = useState("");
   const [location, setLocation] = useState("");
+  const { isConnected } = useAccount();
   const [selectedCategories, setSelectedCategories] = useState<VideoCategory[]>([]);
   const { toast } = useToast();
 
@@ -108,15 +111,23 @@ export const ContentSubmissionModal = () => {
             </div>
           </div>
 
-          <div className="bg-muted/50 p-3 rounded-md">
-            <p className="text-sm text-muted-foreground">
-              💸 Pay <span className="font-bold text-foreground">$0.10</span> to post (Base Pay)
-            </p>
-          </div>
-
-          <Button type="submit" className="w-full">
-            Post to Stream
-          </Button>
+          <BasePay
+            amount={0.10}
+            disabled={!isConnected || selectedCategories.length === 0 || !location.trim() || !embedUrl.trim()}
+            onSuccess={() => {
+              toast({
+                title: "Content submitted!",
+                description: "Your video has been posted to the stream",
+              });
+              setOpen(false);
+              // Reset form
+              setEmbedUrl("");
+              setLocation("");
+              setSelectedCategories([]);
+            }}
+          >
+            Post to Stream ($0.10)
+          </BasePay>
         </form>
       </DialogContent>
     </Dialog>

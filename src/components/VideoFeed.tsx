@@ -5,7 +5,7 @@ import { StreamFilters } from "./StreamFilters";
 import { ContentSubmissionModal } from "./ContentSubmissionModal";
 import { mockVideos } from "@/data/mockVideos";
 import { VideoCategory } from "@/types/video";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Play, Pause } from "lucide-react";
 
 export const VideoFeed = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -13,6 +13,8 @@ export const VideoFeed = () => {
   const [touchEnd, setTouchEnd] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState<VideoCategory[]>([]);
   const [locationSearch, setLocationSearch] = useState("");
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [videoProgress, setVideoProgress] = useState(0);
 
   // Filter videos based on selected categories and location
   const filteredVideos = useMemo(() => {
@@ -36,6 +38,43 @@ export const VideoFeed = () => {
 
   const currentVideo = filteredVideos[currentIndex];
 
+  // Track video progress
+  useEffect(() => {
+    if (!isAutoPlaying || !currentVideo) return;
+
+    setVideoProgress(0);
+    const duration = (currentVideo.duration || 3) * 1000;
+    const startTime = Date.now();
+
+    const progressInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / duration) * 100, 100);
+      setVideoProgress(progress);
+    }, 50);
+
+    return () => clearInterval(progressInterval);
+  }, [currentIndex, isAutoPlaying, currentVideo]);
+
+  // Auto-play: advance to next video based on video duration
+  useEffect(() => {
+    if (!isAutoPlaying || filteredVideos.length === 0 || !currentVideo) return;
+
+    // Use video duration (in seconds) * 1000 to convert to milliseconds
+    const duration = (currentVideo.duration || 3) * 1000;
+
+    const timer = setTimeout(() => {
+      setCurrentIndex(prev => {
+        // Loop back to start when reaching the end
+        if (prev >= filteredVideos.length - 1) {
+          return 0;
+        }
+        return prev + 1;
+      });
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex, isAutoPlaying, filteredVideos.length, currentVideo]);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientY);
   };
@@ -51,12 +90,20 @@ export const VideoFeed = () => {
     const isSwipeUp = distance > 50;
     const isSwipeDown = distance < -50;
 
-    if (isSwipeUp && currentIndex < filteredVideos.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+    if (isSwipeUp) {
+      // Swipe up - go to next video (with loop)
+      setCurrentIndex(prev => (prev >= filteredVideos.length - 1) ? 0 : prev + 1);
+      // Pause auto-play temporarily when user manually swipes
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), 5000); // Resume after 5 seconds
     }
 
-    if (isSwipeDown && currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+    if (isSwipeDown) {
+      // Swipe down - go to previous video (with loop)
+      setCurrentIndex(prev => (prev <= 0) ? filteredVideos.length - 1 : prev - 1);
+      // Pause auto-play temporarily when user manually swipes
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), 5000); // Resume after 5 seconds
     }
 
     setTouchStart(0);
@@ -64,13 +111,41 @@ export const VideoFeed = () => {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "ArrowDown" && currentIndex < filteredVideos.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+    if (e.key === "ArrowDown") {
+      // Arrow down - go to next video (with loop)
+      setCurrentIndex(prev => (prev >= filteredVideos.length - 1) ? 0 : prev + 1);
+      // Pause auto-play temporarily when user manually navigates
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), 5000); // Resume after 5 seconds
     }
-    if (e.key === "ArrowUp" && currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+    if (e.key === "ArrowUp") {
+      // Arrow up - go to previous video (with loop)
+      setCurrentIndex(prev => (prev <= 0) ? filteredVideos.length - 1 : prev - 1);
+      // Pause auto-play temporarily when user manually navigates
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), 5000); // Resume after 5 seconds
     }
   };
+
+  const handleWheel = (e: WheelEvent) => {
+    // Throttle wheel events to prevent too rapid scrolling
+    const now = Date.now();
+    if (now - (handleWheel as any).lastScroll < 500) return;
+    (handleWheel as any).lastScroll = now;
+
+    if (e.deltaY > 0) {
+      // Scroll down - go to next video (with loop)
+      setCurrentIndex(prev => (prev >= filteredVideos.length - 1) ? 0 : prev + 1);
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), 5000);
+    } else if (e.deltaY < 0) {
+      // Scroll up - go to previous video (with loop)
+      setCurrentIndex(prev => (prev <= 0) ? filteredVideos.length - 1 : prev - 1);
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), 5000);
+    }
+  };
+  (handleWheel as any).lastScroll = 0;
 
   const handleCategoryToggle = (category: VideoCategory) => {
     setSelectedCategories(prev =>
@@ -101,8 +176,12 @@ export const VideoFeed = () => {
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentIndex]);
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, [currentIndex, filteredVideos.length]);
 
   if (!currentVideo) {
     return (
@@ -150,38 +229,62 @@ export const VideoFeed = () => {
       </div>
 
       {/* Navigation Indicators */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-4">
+      <div className="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3 sm:gap-4">
+        {/* Auto-play toggle */}
         <button
-          onClick={() => currentIndex > 0 && setCurrentIndex(currentIndex - 1)}
-          disabled={currentIndex === 0}
-          className={`w-12 h-12 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center transition-opacity ${
-            currentIndex === 0 ? "opacity-30 cursor-not-allowed" : "opacity-100 hover:bg-card"
-          }`}
+          onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-black/80 border border-white/20"
+          title={isAutoPlaying ? "Pause auto-play" : "Resume auto-play"}
         >
-          <ChevronUp className="w-6 h-6 text-foreground" />
+          {isAutoPlaying ? (
+            <Pause className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          ) : (
+            <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          )}
+        </button>
+        
+        <button
+          onClick={() => {
+            // Go to previous video (with loop)
+            setCurrentIndex(prev => (prev <= 0) ? filteredVideos.length - 1 : prev - 1);
+            setIsAutoPlaying(false);
+            setTimeout(() => setIsAutoPlaying(true), 5000);
+          }}
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center transition-opacity border border-white/20 opacity-100 hover:bg-black/80"
+        >
+          <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
         <button
-          onClick={() => currentIndex < filteredVideos.length - 1 && setCurrentIndex(currentIndex + 1)}
-          disabled={currentIndex === filteredVideos.length - 1}
-          className={`w-12 h-12 rounded-full bg-card/80 backdrop-blur-sm flex items-center justify-center transition-opacity ${
-            currentIndex === filteredVideos.length - 1 ? "opacity-30 cursor-not-allowed" : "opacity-100 hover:bg-card"
-          }`}
+          onClick={() => {
+            // Go to next video (with loop)
+            setCurrentIndex(prev => (prev >= filteredVideos.length - 1) ? 0 : prev + 1);
+            setIsAutoPlaying(false);
+            setTimeout(() => setIsAutoPlaying(true), 5000);
+          }}
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center transition-opacity border border-white/20 opacity-100 hover:bg-black/80"
         >
-          <ChevronDown className="w-6 h-6 text-foreground" />
+          <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
       </div>
 
       {/* Progress Dots */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+      <div className="absolute top-16 sm:top-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
         {filteredVideos.map((_, index) => (
           <div
             key={index}
-            className={`h-1 rounded-full transition-all ${
-              index === currentIndex
-                ? "w-8 bg-primary"
-                : "w-1 bg-muted-foreground/30"
-            }`}
-          />
+            className="relative h-1 rounded-full bg-muted-foreground/30 overflow-hidden"
+            style={{ width: index === currentIndex ? '32px' : '4px' }}
+          >
+            {index === currentIndex && isAutoPlaying && (
+              <div
+                className="absolute inset-0 bg-primary transition-all duration-100"
+                style={{ width: `${videoProgress}%` }}
+              />
+            )}
+            {index === currentIndex && !isAutoPlaying && (
+              <div className="absolute inset-0 bg-primary" />
+            )}
+          </div>
         ))}
       </div>
 

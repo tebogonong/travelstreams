@@ -1,12 +1,23 @@
 import { VideoContent } from "@/types/video";
-import { TrendingUp, TrendingDown, Users, DollarSign, Flame } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, DollarSign, Flame, Award, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useRef } from "react";
 
 interface VideoCardProps {
   video: VideoContent;
+  onVideoEnd?: () => void;
 }
 
-export const VideoCard = ({ video }: VideoCardProps) => {
+export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(err => console.log("Video autoplay prevented:", err));
+    }
+  }, [video.id]);
+
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
@@ -19,10 +30,15 @@ export const VideoCard = ({ video }: VideoCardProps) => {
     <div className="absolute inset-0">
       {/* Video Background */}
       <div className="absolute inset-0 bg-black">
-        <img
-          src={video.thumbnailUrl}
-          alt={video.location.name}
-          className="w-full h-full object-cover opacity-70"
+        <video
+          ref={videoRef}
+          src={video.videoUrl}
+          className="w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          onEnded={onVideoEnd}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80" />
       </div>
@@ -42,14 +58,24 @@ export const VideoCard = ({ video }: VideoCardProps) => {
               <p className="text-sm text-muted-foreground">
                 {video.location.name}, {video.location.country}
               </p>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {video.categories.map((category) => (
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-1 text-xs text-yellow-400">
+                  <Award className="w-3 h-3" />
+                  <span>{video.creator.xpPoints.toLocaleString()} XP</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-pink-400">
+                  <Heart className="w-3 h-3" />
+                  <span>{formatNumber(video.likes)}</span>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1 mt-2">
+                {video.streamTags?.slice(0, 3).map((tag, idx) => (
                   <Badge
-                    key={category}
+                    key={idx}
                     variant="secondary"
-                    className="text-xs capitalize bg-background/50 backdrop-blur-sm"
+                    className="text-xs bg-primary/20 backdrop-blur-sm"
                   >
-                    {category}
+                    #{tag}
                   </Badge>
                 ))}
               </div>
@@ -108,12 +134,12 @@ export const VideoCard = ({ video }: VideoCardProps) => {
               <p className="font-bold text-foreground">{formatNumber(video.views)}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Betting Pool</p>
-              <p className="font-bold text-foreground">${formatNumber(video.bettingPool)}</p>
+              <p className="text-muted-foreground">XP Earned</p>
+              <p className="font-bold text-yellow-400">+{video.xpEarned || 0}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Post Fee</p>
-              <p className="font-bold text-crypto-green">${video.paidToPost.toFixed(2)}</p>
+              <p className="text-muted-foreground">Betting Pool</p>
+              <p className="font-bold text-foreground">${formatNumber(video.bettingPool)}</p>
             </div>
           </div>
         </div>

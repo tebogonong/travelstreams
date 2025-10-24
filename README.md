@@ -59,6 +59,31 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Wagmi (Web3 React Hooks)
+- Base Sepolia Testnet
+- RainbowKit (Wallet Connection)
+
+## Base Integration
+
+This project integrates with Base blockchain for payments and wallet connectivity:
+
+### Features
+- **Base Pay Integration**: All payments are processed through Base Sepolia testnet
+- **Wallet Connection**: Connect with Coinbase Wallet or any injected wallet
+- **Native ETH Payments**: Uses ETH on Base Sepolia for all transactions
+- **Real-time Transaction Status**: Track payment confirmations on-chain
+
+### Setup Base Integration
+
+1. **Install Dependencies**: Already included in package.json
+2. **Connect Wallet**: Click "Connect Wallet" in the top-right corner
+3. **Switch to Base Sepolia**: The app will prompt you to switch networks
+4. **Get Test ETH**: Visit [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet)
+
+### Usage
+- **Trading**: Connect wallet to bet on video virality or buy location tokens
+- **Content Submission**: Pay $0.10 in ETH to submit videos to the stream
+- **All transactions are processed on Base Sepolia testnet**
 
 ## How can I deploy this project?
 

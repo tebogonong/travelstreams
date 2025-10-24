@@ -25,7 +25,7 @@ export const StreamFilters = ({
   const [showFilters, setShowFilters] = useState(false);
 
   return (
-    <div className="absolute top-16 left-0 right-0 z-20 px-4 space-y-2">
+    <div className="absolute top-20 sm:top-16 left-0 right-0 z-20 px-4 space-y-2">
       {/* Location Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -34,7 +34,7 @@ export const StreamFilters = ({
           placeholder="Search location..."
           value={locationSearch}
           onChange={(e) => onLocationSearch(e.target.value)}
-          className="pl-10 bg-card/90 backdrop-blur-sm"
+          className="pl-10 bg-card/90 backdrop-blur-sm text-sm"
           onFocus={() => setShowFilters(true)}
         />
         {locationSearch && (
