@@ -1,98 +1,143 @@
-# Welcome to your Lovable project
+# TravelStreamz 🌍✈️
 
-## Project info
+**Stream the World, Win Rewards**
 
-**URL**: https://lovable.dev/projects/1d317255-f4f0-4978-9056-eb5add1921cc
+TravelStreamz is a TikTok-style vertical video streaming platform that combines viral travel content with blockchain-based rewards and slot machine mechanics. Built on Base Sepolia testnet with integrated wallet connectivity and payment processing.
 
-## How can I edit this code?
+## 🎯 Features
 
-There are several ways of editing your application.
+### 🎥 Video Streaming
+- **Vertical Scroll Feed**: TikTok-style infinite scroll with real travel videos
+- **Auto-Play System**: Videos auto-advance after 3-3.5 seconds
+- **Multi-Input Scrolling**:
+  - 🎮 Keyboard navigation (Arrow Up/Down)
+  - 👆 Touch swipe gestures (mobile)
+  - 🖱️ Mouse wheel scrolling
+  - 🔘 Manual navigation buttons
+  - ⏱️ Automatic progression
+- **Visual Progress Bar**: Real-time video progress indicator
 
-**Use Lovable**
+### 🎰 Slot Machine Betting
+- **3-Reel Video Slots**: Bet on location token matches
+- **Token Tickers**: Display symbols like $BALI, $VEGAS, $DUBAI
+- **Center Match Line**: Clear alignment indicators for winning combinations
+- **Live Stream Integration**: Videos play in slot reels
+- **Win Notifications**: Instant feedback on matched tokens
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1d317255-f4f0-4978-9056-eb5add1921cc) and start prompting.
+### 💳 Blockchain Integration
+- **Base Sepolia Testnet**: All transactions on Base L2
+- **Wallet Connection**: RainbowKit with Coinbase Wallet support
+- **Base Pay**: Native ETH payments for all transactions
+- **Real-time Status**: Track payment confirmations on-chain
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🎨 Modern UI/UX
+- **Mobile-First Design**: Fully responsive across all devices
+- **Burger Menu Navigation**: Clean left/right menu system
+- **Floating Action Bar**: Expandable token info widget
+- **Stream Filters**: Customize content by category and location
+- **View Modes**: Classic feed, multi-stream, and slot machine views
 
-**Use your preferred IDE**
+## 🚀 Getting Started
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
+- Node.js 18+ and npm
+- Git
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repository
+git clone https://github.com/tebogonong/travelstreamz.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to project directory
+cd travelstreamz
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:8081`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🛠️ Tech Stack
 
-**Use GitHub Codespaces**
+- **Frontend**: React 18.3.1 + TypeScript 5.8.3
+- **Build Tool**: Vite 5.4.19
+- **Styling**: Tailwind CSS 3.4.17 + shadcn-ui components
+- **Blockchain**: Wagmi v2 + Viem (Base Sepolia)
+- **Wallet**: RainbowKit + Coinbase Wallet SDK
+- **Social**: Farcaster Mini App SDK
+- **Video**: HTML5 Video API + Pixabay CDN
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 💎 Blockchain Features
 
-## What technologies are used for this project?
+### Base Pay Integration
+All payments are processed through **Base Sepolia testnet** using native ETH:
 
-This project is built with:
+- **Wallet Connection**: Click "Connect Wallet" to get started
+- **Supported Wallets**: Coinbase Wallet, MetaMask, and other injected wallets
+- **Network**: Automatically prompts to switch to Base Sepolia
+- **Get Test ETH**: Visit [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Wagmi (Web3 React Hooks)
-- Base Sepolia Testnet
-- RainbowKit (Wallet Connection)
+### How to Use
+1. **Connect Your Wallet**: Top-right corner (desktop) or menu (mobile)
+2. **Switch to Base Sepolia**: Follow the prompt if not already on the network
+3. **Bet on Slots**: Place bets on video location token matches
+4. **Submit Content**: Pay $0.10 ETH to submit your travel videos
+5. **Trade Tokens**: Buy/sell location tokens like $BALI, $VEGAS, $DUBAI
 
-## Base Integration
+### Transaction Types
+- 🎰 **Slot Bets**: Wager on matching location tokens across 3 reels
+- 📹 **Video Submissions**: Upload your own travel content
+- 💰 **Token Trading**: Speculate on viral destination popularity
+- 🎁 **Rewards**: Win ETH from successful bets and viral content
 
-This project integrates with Base blockchain for payments and wallet connectivity:
+## 🎮 Usage Guide
 
-### Features
-- **Base Pay Integration**: All payments are processed through Base Sepolia testnet
-- **Wallet Connection**: Connect with Coinbase Wallet or any injected wallet
-- **Native ETH Payments**: Uses ETH on Base Sepolia for all transactions
-- **Real-time Transaction Status**: Track payment confirmations on-chain
+### Navigation
+- **Desktop**: Use Arrow Up/Down keys or mouse wheel to scroll videos
+- **Mobile**: Swipe up/down to navigate between travel streams
+- **Auto-Play**: Videos automatically advance every 3-3.5 seconds
+- **Manual Controls**: Use on-screen up/down buttons anytime
 
-### Setup Base Integration
+### View Modes
+1. **Classic Feed**: Single vertical video stream
+2. **Multi-Stream**: Split screen with 2-3 simultaneous streams
+3. **Slot Machine**: 3-reel gambling interface with video slots
 
-1. **Install Dependencies**: Already included in package.json
-2. **Connect Wallet**: Click "Connect Wallet" in the top-right corner
-3. **Switch to Base Sepolia**: The app will prompt you to switch networks
-4. **Get Test ETH**: Visit [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet)
+### Betting on Slots
+1. Select "Slots" view mode from the menu
+2. Connect your wallet if not already connected
+3. Choose your bet amount
+4. Click "SPIN" to start the reels
+5. Win when 3 matching location tokens align on the center line
 
-### Usage
-- **Trading**: Connect wallet to bet on video virality or buy location tokens
-- **Content Submission**: Pay $0.10 in ETH to submit videos to the stream
-- **All transactions are processed on Base Sepolia testnet**
+## 📱 Screenshots
 
-## How can I deploy this project?
+- 🎥 Vertical video feed with auto-scroll
+- 🎰 Slot machine with $BALI, $VEGAS, $DUBAI tickers
+- 📊 Token info and trading interface
+- 🔗 Wallet connection with Base Sepolia
 
-Simply open [Lovable](https://lovable.dev/projects/1d317255-f4f0-4978-9056-eb5add1921cc) and click on Share -> Publish.
+## 📄 License
 
-## Can I connect a custom domain to my Lovable project?
+This project is licensed under the **Ribbon Protocol Business Open Source License (RP-BOSL v1.0)**.
 
-Yes, you can!
+Licensed to: **Tebogo Nong**
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+See [LICENSE.md](./LICENSE.md) for full terms including revenue sharing and compliance requirements.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🤝 Contributing
+
+This is a whitelabel licensed project. Please refer to the license terms before contributing.
+
+## 📞 Support
+
+For issues, questions, or feature requests, please open an issue on GitHub.
+
+---
+
+**Built with ❤️ by Ribbon Protocol**  
+Licensed to Tebogo Nong under RP-BOSL v1.0
