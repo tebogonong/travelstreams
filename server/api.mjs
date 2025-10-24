@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { MongoClient, GridFSBucket, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
+import compression from 'compression';
 
 dotenv.config();
 
@@ -9,7 +10,19 @@ const app = express();
 const PORT = process.env.API_PORT || 3001;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-app.use(cors());
+// Enable compression for all responses
+app.use(compression({
+  level: 6, // Balance between speed and compression
+  threshold: 1024 // Only compress responses larger than 1KB
+}));
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Range'],
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length']
+}));
+
 app.use(express.json());
 
 let client;
@@ -105,7 +118,7 @@ app.get('/api/videos/location/:locationId', async (req, res) => {
   }
 });
 
-// Stream video
+// Stream video with range support (for seeking and progressive loading)
 app.get('/api/videos/stream/:fileId', async (req, res) => {
   try {
     const { fileId } = req.params;
@@ -114,31 +127,66 @@ app.get('/api/videos/stream/:fileId', async (req, res) => {
       return res.status(400).json({ error: 'Invalid file ID' });
     }
     
-    // Get file info for better caching
+    // Get file info
     const fileInfo = await db.collection('videos.files').findOne({ _id: new ObjectId(fileId) });
     
     if (!fileInfo) {
       return res.status(404).json({ error: 'Video not found' });
     }
     
-    const downloadStream = bucket.openDownloadStream(new ObjectId(fileId));
+    const fileSize = fileInfo.length;
+    const range = req.headers.range;
     
-    // Set aggressive caching headers for video files
-    res.set({
-      'Content-Type': 'video/mp4',
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': 'public, max-age=31536000, immutable', // Cache for 1 year
-      'Content-Length': fileInfo.length
-    });
-    
-    downloadStream.on('error', (error) => {
-      console.error('Stream error:', error);
-      if (!res.headersSent) {
-        res.status(404).json({ error: 'Video not found' });
-      }
-    });
-    
-    downloadStream.pipe(res);
+    // Support range requests for progressive loading
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunkSize = (end - start) + 1;
+      
+      // Open download stream with range
+      const downloadStream = bucket.openDownloadStream(new ObjectId(fileId), {
+        start: start,
+        end: end + 1
+      });
+      
+      res.writeHead(206, {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunkSize,
+        'Content-Type': 'video/mp4',
+        'Cache-Control': 'public, max-age=31536000, immutable'
+      });
+      
+      downloadStream.pipe(res);
+      
+      downloadStream.on('error', (error) => {
+        console.error('Stream error:', error);
+        if (!res.headersSent) {
+          res.status(500).end();
+        }
+      });
+      
+    } else {
+      // Full file download
+      const downloadStream = bucket.openDownloadStream(new ObjectId(fileId));
+      
+      res.writeHead(200, {
+        'Content-Type': 'video/mp4',
+        'Content-Length': fileSize,
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=31536000, immutable'
+      });
+      
+      downloadStream.pipe(res);
+      
+      downloadStream.on('error', (error) => {
+        console.error('Stream error:', error);
+        if (!res.headersSent) {
+          res.status(500).end();
+        }
+      });
+    }
   } catch (error) {
     console.error('Error streaming video:', error);
     if (!res.headersSent) {

@@ -2,6 +2,7 @@ import { VideoContent } from "@/types/video";
 import { TrendingUp, TrendingDown, Users, DollarSign, Flame, Award, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef, useState } from "react";
+import { useDeviceCapabilities } from "@/hooks/useDeviceCapabilities";
 
 interface VideoCardProps {
   video: VideoContent;
@@ -11,26 +12,50 @@ interface VideoCardProps {
 export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [quality, setQuality] = useState<'auto' | 'low'>('auto');
+  const loadStartTime = useRef<number>(0);
+  const deviceInfo = useDeviceCapabilities();
+
+  // Detect low-end device
+  useEffect(() => {
+    if (deviceInfo.isLowEnd) {
+      setQuality('low');
+      console.log('📱 Low-end device detected - Optimizing playback');
+    }
+  }, [deviceInfo.isLowEnd]);
 
   useEffect(() => {
     if (videoRef.current) {
       // Reset loaded state when video changes
       setIsLoaded(false);
+      loadStartTime.current = performance.now();
       
-      // Preload and play
+      // Low-end device optimizations
+      if (quality === 'low') {
+        // Reduce quality for low-end devices
+        videoRef.current.playbackRate = 1.0;
+        // Preload only metadata, not full video
+        videoRef.current.preload = 'metadata';
+      } else {
+        videoRef.current.preload = 'auto';
+      }
+      
+      // Load and play
       videoRef.current.load();
       
-      // Set playback rate slightly faster for smoother loops
-      videoRef.current.playbackRate = 1.0;
-      
-      videoRef.current.play().catch(err => {
-        console.log("Video autoplay prevented:", err);
-      });
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.log("Video autoplay prevented:", err);
+        });
+      }
     }
-  }, [video.id]);
+  }, [video.id, quality]);
 
   const handleCanPlay = () => {
     setIsLoaded(true);
+    const loadTime = performance.now() - loadStartTime.current;
+    console.log(`⚡ Video loaded in ${loadTime.toFixed(0)}ms - ${video.location.name}`);
   };
 
   const formatNumber = (num: number) => {
@@ -66,9 +91,14 @@ export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
           muted
           playsInline
           preload="auto"
+          crossOrigin="anonymous"
           onCanPlay={handleCanPlay}
+          onCanPlayThrough={handleCanPlay}
           onLoadedData={handleCanPlay}
           onEnded={onVideoEnd}
+          // Low-end device optimizations
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80" />
       </div>
