@@ -217,14 +217,14 @@ export const SlotMachineViewer = ({ streams, onBack }: SlotMachineViewerProps) =
       
       {/* Back Button */}
       {onBack && (
-        <div className="absolute top-4 left-4 z-50">
+        <div className="absolute top-4 left-4 z-[60]">
           <Button
             onClick={onBack}
             variant="outline"
             size="icon"
-            className="h-10 w-10 rounded-full backdrop-blur-sm bg-black/80 border-white/20 hover:bg-white/20 shadow-lg"
+            className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/90 border-white/30 hover:bg-white/30 shadow-2xl"
           >
-            <ArrowLeft className="h-5 w-5 text-white" />
+            <ArrowLeft className="h-6 w-6 text-white" />
           </Button>
         </div>
       )}

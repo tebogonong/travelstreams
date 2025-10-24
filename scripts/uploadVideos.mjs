@@ -3,6 +3,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import ffprobeInstaller from '@ffprobe-installer/ffprobe';
+
+// Set FFmpeg and FFprobe paths
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -74,7 +81,7 @@ function getRandomElements(array, count) {
   return shuffled.slice(0, count);
 }
 
-function generateVideoMetadata(filename, locationIndex) {
+function generateVideoMetadata(filename, locationIndex, actualDuration = 3) {
   const location = LOCATIONS[locationIndex % LOCATIONS.length];
   const creator = getRandomElement(CREATORS);
   const categories = getRandomElements(CATEGORIES, 3);
@@ -87,7 +94,7 @@ function generateVideoMetadata(filename, locationIndex) {
     coordinates: location.coordinates,
     creator,
     thumbnailUrl: `/placeholder.svg`,
-    duration: Math.random() * 2 + 2.5, // 2.5-4.5 seconds
+    duration: actualDuration, // Use actual video duration
     views: Math.floor(Math.random() * 300000) + 50000,
     likes: Math.floor(Math.random() * 20000) + 5000,
     viralityScore: Math.floor(Math.random() * 30) + 70,
@@ -98,6 +105,24 @@ function generateVideoMetadata(filename, locationIndex) {
     streamTags: [location.name, location.country],
     xpEarned: Math.floor(Math.random() * 800) + 200
   };
+}
+
+/**
+ * Get video duration using FFprobe
+ * @param {string} filePath - Video file path
+ * @returns {Promise<number>} - Duration in seconds
+ */
+async function getVideoDuration(filePath) {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(filePath, (err, metadata) => {
+      if (err) {
+        console.log(`  Warning: Could not read duration for ${path.basename(filePath)}, using 3s default`);
+        resolve(3);
+      } else {
+        resolve(metadata.format.duration || 3);
+      }
+    });
+  });
 }
 
 async function uploadVideosToMongoDB() {
@@ -139,8 +164,14 @@ async function uploadVideosToMongoDB() {
         // Read file
         const fileBuffer = fs.readFileSync(filePath);
         
-        // Generate metadata
-        const metadata = generateVideoMetadata(filename, i);
+        // Get actual video duration
+        const duration = await getVideoDuration(filePath);
+        const fileSizeMB = (fileBuffer.length / (1024 * 1024)).toFixed(2);
+        
+        console.log(`  Duration: ${duration.toFixed(2)}s, Size: ${fileSizeMB}MB`);
+        
+        // Generate metadata with actual duration
+        const metadata = generateVideoMetadata(filename, i, duration);
         
         // Upload to GridFS
         const uploadStream = bucket.openUploadStream(filename, {
