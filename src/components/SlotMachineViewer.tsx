@@ -8,7 +8,8 @@ import {
   Sparkles,
   Zap,
   Coins,
-  DollarSign
+  DollarSign,
+  ArrowLeft
 } from "lucide-react";
 import {
   Dialog,
@@ -23,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface SlotMachineViewerProps {
   streams: Stream[];
+  onBack?: () => void;
 }
 
 type SlotPosition = {
@@ -40,7 +42,7 @@ interface WinResult {
   message: string;
 }
 
-export const SlotMachineViewer = ({ streams }: SlotMachineViewerProps) => {
+export const SlotMachineViewer = ({ streams, onBack }: SlotMachineViewerProps) => {
   const [slotPositions, setSlotPositions] = useState<SlotPosition[]>([
     { streamIndex: 0, videoIndex: 0, isSpinning: false },
     { streamIndex: 1, videoIndex: 0, isSpinning: false },
@@ -213,6 +215,20 @@ export const SlotMachineViewer = ({ streams }: SlotMachineViewerProps) => {
       {/* Animated Background */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvc3ZnPg==')] opacity-20 animate-pulse" />
       
+      {/* Back Button */}
+      {onBack && (
+        <div className="absolute top-4 left-4 z-50">
+          <Button
+            onClick={onBack}
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 rounded-full backdrop-blur-sm bg-black/80 border-white/20 hover:bg-white/20 shadow-lg"
+          >
+            <ArrowLeft className="h-5 w-5 text-white" />
+          </Button>
+        </div>
+      )}
+
       {/* Top Bar - Stats */}
       <div className="absolute top-0 left-0 right-0 z-50 p-2 sm:p-6 bg-gradient-to-b from-black/80 to-transparent">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 max-w-7xl mx-auto">

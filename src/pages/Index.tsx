@@ -33,7 +33,8 @@ import {
   Columns2,
   Columns3,
   Filter,
-  Home
+  Home,
+  ArrowLeft
 } from "lucide-react";
 
 const Index = () => {
@@ -56,6 +57,20 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background relative">
+      {/* Back Button - Show when not in classic mode */}
+      {viewMode !== 'classic' && (
+        <div className="fixed top-4 left-4 z-50">
+          <Button
+            onClick={() => setViewMode('classic')}
+            variant="outline"
+            size="icon"
+            className="h-12 w-12 rounded-full backdrop-blur-sm bg-black/60 border-white/20 hover:bg-black/80 shadow-lg"
+          >
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+        </div>
+      )}
+
       {/* Mobile: Vertical Left Navigation Bar */}
       <div className="fixed left-2 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2 sm:hidden">
         {/* Left Burger Menu - Navigation & View Modes */}
@@ -357,11 +372,15 @@ const Index = () => {
 
       {/* Main Content */}
       {viewMode === 'slots' ? (
-        <SlotMachineViewer streams={mockStreams.slice(0, 3)} />
+        <SlotMachineViewer 
+          streams={mockStreams.slice(0, 3)} 
+          onBack={() => setViewMode('classic')}
+        />
       ) : viewMode === 'streams' && selectedStreams.length > 0 ? (
         <MultiStreamViewer 
           availableStreams={mockStreams}
           initialMode={streamViewMode}
+          onBack={() => setViewMode('classic')}
         />
       ) : (
         <VideoFeed />

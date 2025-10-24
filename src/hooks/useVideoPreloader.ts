@@ -55,7 +55,8 @@ export const useVideoPreloader = (
     // Create hidden video elements to preload
     videosToPreload.forEach((video, idx) => {
       const videoElement = document.createElement('video');
-      videoElement.src = video.videoUrl;
+      
+      // Set attributes before src to ensure proper loading
       videoElement.preload = idx === 0 ? 'auto' : 'metadata'; // Full preload for next, metadata for others
       videoElement.muted = true;
       videoElement.playsInline = true;
@@ -68,9 +69,13 @@ export const useVideoPreloader = (
       });
       
       videoElement.addEventListener('error', (e) => {
-        console.log(`❌ Failed to preload: ${video.location.name}`, e);
+        // Silently handle errors - not all videos may be available yet
+        preloadedVideos.current.delete(video.videoUrl);
       });
 
+      // Set src after all attributes are configured
+      videoElement.src = video.videoUrl;
+      
       document.body.appendChild(videoElement);
       preloadElements.current.push(videoElement);
       

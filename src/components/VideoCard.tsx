@@ -32,23 +32,34 @@ export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
       
       // Low-end device optimizations
       if (quality === 'low') {
-        // Reduce quality for low-end devices
         videoRef.current.playbackRate = 1.0;
-        // Preload only metadata, not full video
         videoRef.current.preload = 'metadata';
       } else {
         videoRef.current.preload = 'auto';
       }
       
-      // Load and play
+      // Load the video
       videoRef.current.load();
       
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(err => {
-          console.log("Video autoplay prevented:", err);
-        });
-      }
+      // Attempt to play with proper error handling
+      const attemptPlay = () => {
+        if (videoRef.current) {
+          const playPromise = videoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              // Silently handle autoplay errors - browser policy
+              if (err.name !== 'AbortError') {
+                console.log("Playback issue:", err.name);
+              }
+            });
+          }
+        }
+      };
+
+      // Small delay to ensure video is ready
+      const timer = setTimeout(attemptPlay, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [video.id, quality]);
 
@@ -56,6 +67,11 @@ export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
     setIsLoaded(true);
     const loadTime = performance.now() - loadStartTime.current;
     console.log(`⚡ Video loaded in ${loadTime.toFixed(0)}ms - ${video.location.name}`);
+  };
+
+  const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    console.log(`⚠️ Video error for ${video.location.name}:`, e.currentTarget.error?.message);
+    // Keep showing the loading state, don't crash
   };
 
   const formatNumber = (num: number) => {
@@ -96,7 +112,7 @@ export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
           onCanPlayThrough={handleCanPlay}
           onLoadedData={handleCanPlay}
           onEnded={onVideoEnd}
-          // Low-end device optimizations
+          onError={handleError}
           disablePictureInPicture
           controlsList="nodownload nofullscreen noremoteplayback"
         />

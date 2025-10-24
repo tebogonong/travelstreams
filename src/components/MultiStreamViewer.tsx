@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { 
   TrendingUp,
   Trophy,
-  Zap
+  Zap,
+  ArrowLeft
 } from "lucide-react";
 import {
   Dialog,
@@ -23,11 +24,13 @@ import { useToast } from "@/hooks/use-toast";
 interface MultiStreamViewerProps {
   availableStreams: Stream[];
   initialMode?: ViewMode;
+  onBack?: () => void;
 }
 
 export const MultiStreamViewer = ({ 
   availableStreams,
-  initialMode = 'single' 
+  initialMode = 'single',
+  onBack
 }: MultiStreamViewerProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>(initialMode);
   const [activeStreams, setActiveStreams] = useState<Stream[]>([availableStreams[0]]);
@@ -106,6 +109,20 @@ export const MultiStreamViewer = ({
 
   return (
     <div className="relative w-full h-screen bg-black">
+      {/* Back Button */}
+      {onBack && (
+        <div className="absolute top-4 left-4 z-50">
+          <Button
+            onClick={onBack}
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 rounded-full backdrop-blur-sm bg-black/80 border-white/20 hover:bg-white/20 shadow-lg"
+          >
+            <ArrowLeft className="h-5 w-5 text-white" />
+          </Button>
+        </div>
+      )}
+
       {/* Competition Mode Indicator */}
       {activeStreams.length > 1 && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 sm:top-4 z-40">
