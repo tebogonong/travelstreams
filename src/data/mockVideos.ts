@@ -1,6 +1,7 @@
 import { VideoContent, VideoCategory } from "@/types/video";
 
-export const mockVideos: VideoContent[] = [
+// Fallback videos in case API is not available
+export const fallbackVideos: VideoContent[] = [
   {
     id: "1",
     location: {
@@ -16,8 +17,8 @@ export const mockVideos: VideoContent[] = [
       xpPoints: 15420,
       totalEarnings: 2340.50
     },
-    videoUrl: "https://cdn.pixabay.com/video/2022/09/09/130741-749831903_tiny.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1537996194471-e657df975ab4",
+    videoUrl: "/placeholder.mp4",
+    thumbnailUrl: "/placeholder.svg",
     duration: 3,
     views: 125000,
     likes: 8900,
@@ -52,8 +53,8 @@ export const mockVideos: VideoContent[] = [
       xpPoints: 12300,
       totalEarnings: 1890.25
     },
-    videoUrl: "https://cdn.pixabay.com/video/2023/04/21/159362-819989516_tiny.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34",
+    videoUrl: "/placeholder.mp4",
+    thumbnailUrl: "/placeholder.svg",
     duration: 3.5,
     views: 98000,
     likes: 7200,
@@ -88,8 +89,8 @@ export const mockVideos: VideoContent[] = [
       xpPoints: 22100,
       totalEarnings: 4567.80
     },
-    videoUrl: "https://cdn.pixabay.com/video/2021/08/30/87490-596931142_tiny.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf",
+    videoUrl: "/placeholder.mp4",
+    thumbnailUrl: "/placeholder.svg",
     duration: 3,
     views: 340000,
     likes: 23400,
@@ -124,8 +125,8 @@ export const mockVideos: VideoContent[] = [
       xpPoints: 12800,
       totalEarnings: 1890.40
     },
-    videoUrl: "https://cdn.pixabay.com/video/2022/01/25/105166-668253617_tiny.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c",
+    videoUrl: "/placeholder.mp4",
+    thumbnailUrl: "/placeholder.svg",
     duration: 3.5,
     views: 89000,
     likes: 5670,
@@ -160,8 +161,8 @@ export const mockVideos: VideoContent[] = [
       xpPoints: 18900,
       totalEarnings: 3210.90
     },
-    videoUrl: "https://cdn.pixabay.com/video/2022/11/11/138581-770540852_tiny.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9",
+    videoUrl: "/placeholder.mp4",
+    thumbnailUrl: "/placeholder.svg",
     duration: 3,
     views: 210000,
     likes: 14500,
@@ -196,8 +197,8 @@ export const mockVideos: VideoContent[] = [
       xpPoints: 9800,
       totalEarnings: 1450.20
     },
-    videoUrl: "https://cdn.pixabay.com/video/2020/06/25/42940-433081619_tiny.mp4",
-    thumbnailUrl: "https://images.unsplash.com/photo-1506929562872-bb421503ef21",
+    videoUrl: "/placeholder.mp4",
+    thumbnailUrl: "/placeholder.svg",
     duration: 3.5,
     views: 167000,
     likes: 12230,
@@ -218,3 +219,7 @@ export const mockVideos: VideoContent[] = [
     xpEarned: 680
   }
 ];
+
+// Export for backward compatibility - defaults to fallback videos
+// Use useVideos hook for dynamic API loading
+export const mockVideos: VideoContent[] = fallbackVideos;

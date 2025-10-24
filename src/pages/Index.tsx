@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 
 const Index = () => {
-  const [viewMode, setViewMode] = useState<'classic' | 'streams' | 'slots'>('streams');
+  const [viewMode, setViewMode] = useState<'classic' | 'streams' | 'slots'>('classic');
   const [selectedStreamTags, setSelectedStreamTags] = useState<string[]>(['Bali']);
   const [streamViewMode, setStreamViewMode] = useState<'single' | 'split-2' | 'split-3'>('single');
 
@@ -338,6 +338,21 @@ const Index = () => {
       {/* Mobile: Top Right - Wallet Only */}
       <div className="fixed top-2 right-2 z-50 sm:hidden">
         <ConnectWallet />
+      </div>
+
+      {/* Floating SLOTS Button - Middle Right */}
+      <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50">
+        <Button
+          onClick={() => setViewMode('slots')}
+          size="lg"
+          className={`h-16 w-16 rounded-full shadow-2xl transition-all duration-300 ${
+            viewMode === 'slots'
+              ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-pink-500 hover:scale-110'
+              : 'bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 hover:scale-105'
+          }`}
+        >
+          <Sparkles className="h-8 w-8" />
+        </Button>
       </div>
 
       {/* Main Content */}

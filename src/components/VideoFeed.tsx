@@ -3,11 +3,13 @@ import { VideoCard } from "./VideoCard";
 import { ActionBar } from "./ActionBar";
 import { StreamFilters } from "./StreamFilters";
 import { ContentSubmissionModal } from "./ContentSubmissionModal";
-import { mockVideos } from "@/data/mockVideos";
+import { useVideos } from "@/hooks/useVideos";
+import { useVideoPreloader } from "@/hooks/useVideoPreloader";
 import { VideoCategory } from "@/types/video";
-import { ChevronUp, ChevronDown, Play, Pause } from "lucide-react";
+import { ChevronUp, ChevronDown, Play, Pause, Loader2 } from "lucide-react";
 
 export const VideoFeed = () => {
+  const { videos: apiVideos, loading, error } = useVideos();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
@@ -18,7 +20,7 @@ export const VideoFeed = () => {
 
   // Filter videos based on selected categories and location
   const filteredVideos = useMemo(() => {
-    let videos = mockVideos;
+    let videos = apiVideos;
 
     if (selectedCategories.length > 0) {
       videos = videos.filter(video =>
@@ -34,9 +36,12 @@ export const VideoFeed = () => {
     }
 
     return videos;
-  }, [selectedCategories, locationSearch]);
+  }, [apiVideos, selectedCategories, locationSearch]);
 
   const currentVideo = filteredVideos[currentIndex];
+  
+  // Preload next videos for faster loading
+  const { isPreloaded, preloadedCount } = useVideoPreloader(filteredVideos, currentIndex, 3);
 
   // Track video progress
   useEffect(() => {
@@ -182,6 +187,45 @@ export const VideoFeed = () => {
       window.removeEventListener("wheel", handleWheel);
     };
   }, [currentIndex, filteredVideos.length]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="relative w-full h-screen overflow-hidden bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
+          <p className="text-xl text-muted-foreground">Loading videos from database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error with fallback info
+  if (error) {
+    return (
+      <div className="relative w-full h-screen overflow-hidden bg-background flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-md px-4">
+          <p className="text-xl text-yellow-500">⚠️ API Connection Issue</p>
+          <p className="text-sm text-muted-foreground">{error}</p>
+          <p className="text-sm text-muted-foreground">Using local placeholder videos ({apiVideos.length} available)</p>
+          <p className="text-xs text-muted-foreground">Note: All 46 real videos are in your MongoDB database</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+          >
+            Retry Connection
+          </button>
+        </div>
+        <StreamFilters
+          selectedCategories={selectedCategories}
+          onCategoryToggle={handleCategoryToggle}
+          locationSearch={locationSearch}
+          onLocationSearch={handleLocationSearch}
+          onClearFilters={handleClearFilters}
+        />
+      </div>
+    );
+  }
 
   if (!currentVideo) {
     return (

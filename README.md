@@ -2,12 +2,14 @@
 
 **Stream the World, Win Rewards**
 
-TravelStreamz is a TikTok-style vertical video streaming platform that combines viral travel content with blockchain-based rewards and slot machine mechanics. Built on Base Sepolia testnet with integrated wallet connectivity and payment processing.
+TravelStreamz is a TikTok-style vertical video streaming platform that combines viral travel content with blockchain-based rewards and slot machine mechanics. Built on Base Sepolia testnet with integrated wallet connectivity, payment processing, and MongoDB video storage.
 
 ## 🎯 Features
 
 ### 🎥 Video Streaming
 - **Vertical Scroll Feed**: TikTok-style infinite scroll with real travel videos
+- **MongoDB Video Storage**: 46 videos stored in database with GridFS streaming
+- **No External Dependencies**: All videos self-hosted, no 404 errors
 - **Auto-Play System**: Videos auto-advance after 3-3.5 seconds
 - **Multi-Input Scrolling**:
   - 🎮 Keyboard navigation (Arrow Up/Down)
@@ -16,6 +18,14 @@ TravelStreamz is a TikTok-style vertical video streaming platform that combines 
   - 🔘 Manual navigation buttons
   - ⏱️ Automatic progression
 - **Visual Progress Bar**: Real-time video progress indicator
+- **6 Global Locations**: Bali, Paris, Tokyo, Dubai, New York, Las Vegas
+
+### 🗄️ Database Integration
+- **MongoDB Atlas**: Cloud database for video storage
+- **GridFS Storage**: Optimized for large video files
+- **Rich Metadata**: Complete travel and gaming context per video
+- **API Server**: Express backend for video streaming and management
+- **Scalable Architecture**: Easy to add unlimited videos
 
 ### 🎰 Slot Machine Betting
 - **3-Reel Video Slots**: Bet on location token matches
@@ -33,7 +43,7 @@ TravelStreamz is a TikTok-style vertical video streaming platform that combines 
 ### 🎨 Modern UI/UX
 - **Mobile-First Design**: Fully responsive across all devices
 - **Burger Menu Navigation**: Clean left/right menu system
-- **Floating Action Bar**: Expandable token info widget
+- **Floating SLOTS Button**: Quick access to slot machine (middle-right)
 - **Stream Filters**: Customize content by category and location
 - **View Modes**: Classic feed, multi-stream, and slot machine views
 
@@ -42,6 +52,7 @@ TravelStreamz is a TikTok-style vertical video streaming platform that combines 
 ### Prerequisites
 - Node.js 18+ and npm
 - Git
+- MongoDB Atlas account (connection string provided)
 
 ### Installation
 
@@ -55,21 +66,30 @@ cd travelstreamz
 # Install dependencies
 npm install
 
-# Start development server
-npm run dev
+# Upload videos to MongoDB (first time only)
+npm run upload
+
+# Start both dev server and API server
+npm run dev:all
 ```
 
-The app will be available at `http://localhost:8081`
+The app will be available at:
+- **Frontend**: `http://localhost:8080`
+- **API Server**: `http://localhost:3001`
+
+For detailed MongoDB setup instructions, see [MONGODB_SETUP.md](./MONGODB_SETUP.md)
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18.3.1 + TypeScript 5.8.3
 - **Build Tool**: Vite 5.4.19
 - **Styling**: Tailwind CSS 3.4.17 + shadcn-ui components
+- **Database**: MongoDB Atlas + GridFS for video storage
+- **API Server**: Express.js + MongoDB Driver
 - **Blockchain**: Wagmi v2 + Viem (Base Sepolia)
 - **Wallet**: RainbowKit + Coinbase Wallet SDK
 - **Social**: Farcaster Mini App SDK
-- **Video**: HTML5 Video API + Pixabay CDN
+- **Video**: HTML5 Video API + GridFS streaming
 
 ## 💎 Blockchain Features
 

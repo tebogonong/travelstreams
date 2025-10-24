@@ -1,7 +1,7 @@
 import { VideoContent } from "@/types/video";
 import { TrendingUp, TrendingDown, Users, DollarSign, Flame, Award, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface VideoCardProps {
   video: VideoContent;
@@ -10,13 +10,28 @@ interface VideoCardProps {
 
 export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (videoRef.current) {
+      // Reset loaded state when video changes
+      setIsLoaded(false);
+      
+      // Preload and play
       videoRef.current.load();
-      videoRef.current.play().catch(err => console.log("Video autoplay prevented:", err));
+      
+      // Set playback rate slightly faster for smoother loops
+      videoRef.current.playbackRate = 1.0;
+      
+      videoRef.current.play().catch(err => {
+        console.log("Video autoplay prevented:", err);
+      });
     }
   }, [video.id]);
+
+  const handleCanPlay = () => {
+    setIsLoaded(true);
+  };
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -30,14 +45,29 @@ export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
     <div className="absolute inset-0">
       {/* Video Background */}
       <div className="absolute inset-0 bg-black">
+        {/* Loading placeholder */}
+        {!isLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        )}
+        
         <video
           ref={videoRef}
           src={video.videoUrl}
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover transition-opacity duration-300 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           autoPlay
           loop
           muted
           playsInline
+          preload="auto"
+          onCanPlay={handleCanPlay}
+          onLoadedData={handleCanPlay}
           onEnded={onVideoEnd}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80" />
