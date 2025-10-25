@@ -9,6 +9,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.API_PORT || 3001;
 const MONGODB_URI = process.env.MONGODB_URI;
+const API_URL = process.env.API_URL || `http://localhost:${PORT}`;
 
 // Enable compression for all responses
 app.use(compression({
@@ -91,7 +92,7 @@ app.get('/api/videos', async (req, res) => {
     
     const videosWithUrls = videos.map(video => ({
       id: video.videoId,
-      videoUrl: `http://localhost:${PORT}/api/videos/stream/${video.gridfsFileId}`,
+      videoUrl: `${API_URL}/api/videos/stream/${video.gridfsFileId}`,
       location: {
         id: video.locationId,
         name: video.locationName,
@@ -139,7 +140,7 @@ app.get('/api/videos/location/:locationId', async (req, res) => {
     
     const videosWithUrls = videos.map(video => ({
       id: video.videoId,
-      videoUrl: `http://localhost:${PORT}/api/videos/stream/${video.gridfsFileId}`,
+      videoUrl: `${API_URL}/api/videos/stream/${video.gridfsFileId}`,
       location: {
         id: video.locationId,
         name: video.locationName,
