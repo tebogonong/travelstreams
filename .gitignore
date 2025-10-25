@@ -17,6 +17,10 @@ dist-ssr
 .env.local
 .env.production
 
+# Video processing folders (large files)
+backup_original_videos/
+temp_trimmed/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
