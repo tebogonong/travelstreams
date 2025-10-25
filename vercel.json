@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server/api.mjs",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server/api.mjs"
+    }
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb-uri",
+    "API_URL": "https://travelstreamz.vercel.app"
+  }
+}
