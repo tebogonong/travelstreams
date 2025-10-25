@@ -16,7 +16,7 @@ export const VideoFeed = () => {
   const [selectedCategories, setSelectedCategories] = useState<VideoCategory[]>([]);
   const [locationSearch, setLocationSearch] = useState("");
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [videoProgress, setVideoProgress] = useState(0);
+  const [loadedVideos, setLoadedVideos] = useState<Set<string>>(new Set());
 
   // Filter videos based on selected categories and location
   const filteredVideos = useMemo(() => {
@@ -35,50 +35,38 @@ export const VideoFeed = () => {
       );
     }
 
-    return videos;
-  }, [apiVideos, selectedCategories, locationSearch]);
+    // Prioritize loaded videos - put them first
+    return videos.sort((a, b) => {
+      const aLoaded = loadedVideos.has(a.id);
+      const bLoaded = loadedVideos.has(b.id);
+      if (aLoaded && !bLoaded) return -1;
+      if (!aLoaded && bLoaded) return 1;
+      return 0;
+    });
+  }, [apiVideos, selectedCategories, locationSearch, loadedVideos]);
 
   const currentVideo = filteredVideos[currentIndex];
   
   // Preload next videos for faster loading
   const { isPreloaded, preloadedCount } = useVideoPreloader(filteredVideos, currentIndex, 3);
 
-  // Track video progress
-  useEffect(() => {
-    if (!isAutoPlaying || !currentVideo) return;
+  // Handle video end - auto-advance to next video
+  const handleVideoEnd = () => {
+    if (!isAutoPlaying) return;
+    
+    setCurrentIndex(prev => {
+      // Loop back to start when reaching the end
+      if (prev >= filteredVideos.length - 1) {
+        return 0;
+      }
+      return prev + 1;
+    });
+  };
 
-    setVideoProgress(0);
-    const duration = (currentVideo.duration || 3) * 1000;
-    const startTime = Date.now();
-
-    const progressInterval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / duration) * 100, 100);
-      setVideoProgress(progress);
-    }, 50);
-
-    return () => clearInterval(progressInterval);
-  }, [currentIndex, isAutoPlaying, currentVideo]);
-
-  // Auto-play: advance to next video based on video duration
-  useEffect(() => {
-    if (!isAutoPlaying || filteredVideos.length === 0 || !currentVideo) return;
-
-    // Use video duration (in seconds) * 1000 to convert to milliseconds
-    const duration = (currentVideo.duration || 3) * 1000;
-
-    const timer = setTimeout(() => {
-      setCurrentIndex(prev => {
-        // Loop back to start when reaching the end
-        if (prev >= filteredVideos.length - 1) {
-          return 0;
-        }
-        return prev + 1;
-      });
-    }, duration);
-
-    return () => clearTimeout(timer);
-  }, [currentIndex, isAutoPlaying, filteredVideos.length, currentVideo]);
+  // Track loaded videos
+  const handleVideoLoaded = (videoId: string) => {
+    setLoadedVideos(prev => new Set(prev).add(videoId));
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientY);
@@ -269,7 +257,11 @@ export const VideoFeed = () => {
 
       {/* Video Card */}
       <div className="w-full h-full transition-transform duration-300 ease-out">
-        <VideoCard video={currentVideo} />
+        <VideoCard 
+          video={currentVideo} 
+          onVideoEnd={handleVideoEnd}
+          onVideoLoaded={handleVideoLoaded}
+        />
       </div>
 
       {/* Navigation Indicators */}
@@ -313,19 +305,18 @@ export const VideoFeed = () => {
 
       {/* Progress Dots */}
       <div className="absolute top-16 sm:top-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
-        {filteredVideos.map((_, index) => (
+        {filteredVideos.map((video, index) => (
           <div
             key={index}
-            className="relative h-1 rounded-full bg-muted-foreground/30 overflow-hidden"
-            style={{ width: index === currentIndex ? '32px' : '4px' }}
+            className="relative h-1 rounded-full overflow-hidden"
+            style={{ 
+              width: index === currentIndex ? '32px' : '4px',
+              backgroundColor: loadedVideos.has(video.id) 
+                ? 'rgba(255, 255, 255, 0.3)' 
+                : 'rgba(255, 255, 255, 0.1)'
+            }}
           >
-            {index === currentIndex && isAutoPlaying && (
-              <div
-                className="absolute inset-0 bg-primary transition-all duration-100"
-                style={{ width: `${videoProgress}%` }}
-              />
-            )}
-            {index === currentIndex && !isAutoPlaying && (
+            {index === currentIndex && (
               <div className="absolute inset-0 bg-primary" />
             )}
           </div>

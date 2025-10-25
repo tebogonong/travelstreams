@@ -7,9 +7,10 @@ import { useDeviceCapabilities } from "@/hooks/useDeviceCapabilities";
 interface VideoCardProps {
   video: VideoContent;
   onVideoEnd?: () => void;
+  onVideoLoaded?: (videoId: string) => void;
 }
 
-export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
+export const VideoCard = ({ video, onVideoEnd, onVideoLoaded }: VideoCardProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [quality, setQuality] = useState<'auto' | 'low'>('auto');
@@ -67,6 +68,11 @@ export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
     setIsLoaded(true);
     const loadTime = performance.now() - loadStartTime.current;
     console.log(`⚡ Video loaded in ${loadTime.toFixed(0)}ms - ${video.location.name}`);
+    
+    // Notify parent that video is loaded
+    if (onVideoLoaded) {
+      onVideoLoaded(video.id);
+    }
   };
 
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
@@ -103,7 +109,6 @@ export const VideoCard = ({ video, onVideoEnd }: VideoCardProps) => {
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           autoPlay
-          loop
           muted
           playsInline
           preload="auto"
